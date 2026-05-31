@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 #include <vector>
 
 Game::Game()
@@ -145,6 +145,9 @@ void Game::handleEvents()
             if (e.key.code == sf::Keyboard::R && state == GameOver)
                 reset();
 
+            if (e.key.code == sf::Keyboard::Q && state == GameOver)
+                window.close();
+
             if (state == Shop)
             {
                 if (e.key.code == sf::Keyboard::Num1)
@@ -185,18 +188,16 @@ void Game::update(float dt)
     for (std::size_t i = 0; i < objectCount; i++)
     {
         if (i < objects.size() && objects[i]->isAlive())
-        {
             objects[i]->update(*this, dt);
-        }
     }
 
     handleCollisions();
     removeDeadObjects();
 
-    if (!player || !player->isAlive())
+    if (player && !player->isAlive())
         state = GameOver;
 
-    if (waveTimer <= 0 && player)
+    if (waveTimer <= 0 && player && player->isAlive())
     {
         wave++;
         waveTimer = config.waveDuration;
@@ -364,16 +365,12 @@ void Game::handleCollisions()
         if (pu && pu->isAlive())
         {
             if (distance(pu->getPosition(), player->getPosition()) < pu->getRadius() + player->getRadius())
-            {
                 pu->collect(*this);
-            }
         }
     }
 
     for (const auto& pos : pickupPositions)
-    {
         createPickup(pos);
-    }
 }
 
 void Game::removeDeadObjects()
@@ -384,6 +381,11 @@ void Game::removeDeadObjects()
             objects.end(),
             [](const std::unique_ptr<GameObject>& o)
             {
+                Player* p = dynamic_cast<Player*>(o.get());
+
+                if (p)
+                    return false;
+
                 return !o->isAlive();
             }
         ),
@@ -514,7 +516,7 @@ bool Game::isInsideWorld(const sf::Vector2f& p) const
 
 void Game::playerShoot()
 {
-    if (!player)
+    if (!player || !player->isAlive())
         return;
 
     Enemy* closest = nullptr;

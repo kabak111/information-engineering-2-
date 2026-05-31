@@ -1,8 +1,8 @@
 #include "UIManager.h"
 #include "Player.h"
 
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 UIManager::UIManager()
 {
@@ -24,6 +24,7 @@ sf::Text UIManager::text(unsigned size, const std::string& s, float x, float y, 
     t.setOutlineColor(sf::Color::Black);
     t.setOutlineThickness(2.f);
     t.setPosition(x, y);
+
     return t;
 }
 
@@ -58,7 +59,14 @@ void UIManager::card(sf::RenderWindow& w, const std::string& title, const std::s
     w.draw(valueText);
 }
 
-void UIManager::drawHUD(sf::RenderWindow& w, const Player& p, int wave, float waveTimer, float gameTime, const std::string& last)
+void UIManager::drawHUD(
+    sf::RenderWindow& w,
+    const Player& p,
+    int wave,
+    float waveTimer,
+    float gameTime,
+    const std::string& last
+)
 {
     float W = w.getSize().x;
     float H = w.getSize().y;
@@ -69,7 +77,12 @@ void UIManager::drawHUD(sf::RenderWindow& w, const Player& p, int wave, float wa
     float start = W / 2.f - totalWidth / 2.f;
     float y = 12;
 
-    std::ostringstream hp, mat, wv, tm, dmg, cd;
+    std::ostringstream hp;
+    std::ostringstream mat;
+    std::ostringstream wv;
+    std::ostringstream tm;
+    std::ostringstream dmg;
+    std::ostringstream cd;
 
     hp << p.getHp() << "/" << p.getMaxHp();
     mat << p.getMaterials();
@@ -117,7 +130,7 @@ void UIManager::drawHUD(sf::RenderWindow& w, const Player& p, int wave, float wa
     bottom.setOutlineColor(sf::Color(35, 35, 35));
     w.draw(bottom);
 
-    sf::Text controls = text(21, "WASD / Arrows - Move", 45, H - 34, sf::Color::White);
+    sf::Text controls = text(21, "WASD / Arrows - Move", 0, 0, sf::Color::White);
     controls.setStyle(sf::Text::Bold);
     centerText(controls, 170, H - 32);
     w.draw(controls);
@@ -163,7 +176,10 @@ void UIManager::drawShop(sf::RenderWindow& w, const Player& p)
     centerText(title, cx, y);
     w.draw(title);
 
-    std::ostringstream s1, s2, s3, s4;
+    std::ostringstream s1;
+    std::ostringstream s2;
+    std::ostringstream s3;
+    std::ostringstream s4;
 
     s1 << "1) Damage: " << std::fixed << std::setprecision(1)
        << p.getDamage() << " -> " << p.getDamage() + 0.5f;
