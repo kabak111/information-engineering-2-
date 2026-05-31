@@ -29,5 +29,3 @@ R - restart after game over
 ## Build
 
 Use VS Code with MSYS2 UCRT64 and SFML.
-
-"@ | Out-File -Encoding utf8 README.md
