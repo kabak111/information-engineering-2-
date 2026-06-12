@@ -22,8 +22,9 @@ sf::Text UIManager::text(unsigned size, const std::string& s, float x, float y, 
     t.setString(s);
     t.setFillColor(c);
     t.setOutlineColor(sf::Color::Black);
-    t.setOutlineThickness(3.f);
+    t.setOutlineThickness(2.f);
     t.setPosition(x, y);
+
     return t;
 }
 
@@ -67,164 +68,88 @@ void UIManager::drawHUD(
     const std::string& last
 )
 {
-    float W = static_cast<float>(w.getSize().x);
-    float H = static_cast<float>(w.getSize().y);
+    float W = w.getSize().x;
+    float H = w.getSize().y;
 
-    sf::RectangleShape panelShadow(sf::Vector2f(250.f, 205.f));
-    panelShadow.setPosition(24.f, 22.f);
-    panelShadow.setFillColor(sf::Color(0, 0, 0, 90));
-    w.draw(panelShadow);
+    float cw = 130;
+    float g = 12;
+    float totalWidth = 6 * cw + 5 * g;
+    float start = W / 2.f - totalWidth / 2.f;
+    float y = 12;
 
-    sf::RectangleShape panel(sf::Vector2f(250.f, 205.f));
-    panel.setPosition(18.f, 16.f);
-    panel.setFillColor(sf::Color(30, 30, 30, 120));
-    panel.setOutlineThickness(3.f);
-    panel.setOutlineColor(sf::Color(235, 235, 235));
-    w.draw(panel);
+    std::ostringstream hp;
+    std::ostringstream mat;
+    std::ostringstream wv;
+    std::ostringstream tm;
+    std::ostringstream dmg;
+    std::ostringstream cd;
 
-    sf::RectangleShape hpBack(sf::Vector2f(186.f, 24.f));
-    hpBack.setPosition(72.f, 24.f);
-    hpBack.setFillColor(sf::Color(40, 40, 40, 220));
-    hpBack.setOutlineThickness(2.f);
+    hp << p.getHp() << "/" << p.getMaxHp();
+    mat << p.getMaterials();
+    wv << wave;
+
+    int sec = (int)gameTime % 60;
+    tm << (int)(gameTime / 60) << ":" << (sec < 10 ? "0" : "") << sec;
+
+    dmg << std::fixed << std::setprecision(1) << p.getDamage();
+    cd << std::fixed << std::setprecision(2) << p.getCooldown();
+
+    card(w, "HP", hp.str(), start, y, cw);
+    card(w, "MATERIALS", mat.str(), start + 1 * (cw + g), y, cw);
+    card(w, "WAVE", wv.str(), start + 2 * (cw + g), y, cw);
+    card(w, "TIME", tm.str(), start + 3 * (cw + g), y, cw);
+    card(w, "DAMAGE", dmg.str(), start + 4 * (cw + g), y, cw);
+    card(w, "COOLDOWN", cd.str(), start + 5 * (cw + g), y, cw);
+
+    sf::RectangleShape hpBack(sf::Vector2f(totalWidth, 15));
+    hpBack.setPosition(start, 75);
+    hpBack.setFillColor(sf::Color(45, 45, 45));
+    hpBack.setOutlineThickness(2);
     hpBack.setOutlineColor(sf::Color::Black);
     w.draw(hpBack);
 
-    float hpPercent = static_cast<float>(p.getHp()) / static_cast<float>(p.getMaxHp());
+    float hpPercent = (float)p.getHp() / (float)p.getMaxHp();
+
     if (hpPercent < 0.f)
         hpPercent = 0.f;
 
-    sf::RectangleShape hpBar(sf::Vector2f(186.f * hpPercent, 24.f));
-    hpBar.setPosition(72.f, 24.f);
+    sf::RectangleShape hpBar(sf::Vector2f(totalWidth * hpPercent, 15));
+    hpBar.setPosition(start, 75);
     hpBar.setFillColor(sf::Color(220, 55, 55));
     w.draw(hpBar);
 
-    sf::Text hpValue = text(20, std::to_string(p.getHp()) + " / " + std::to_string(p.getMaxHp()), 0.f, 0.f, sf::Color::White);
-    hpValue.setStyle(sf::Text::Bold);
-    hpValue.setOutlineThickness(3.f);
-    centerText(hpValue, 165.f, 36.f);
-    w.draw(hpValue);
-
-    sf::RectangleShape lvlBack(sf::Vector2f(186.f, 18.f));
-    lvlBack.setPosition(72.f, 56.f);
-    lvlBack.setFillColor(sf::Color(45, 45, 45, 220));
-    lvlBack.setOutlineThickness(2.f);
-    lvlBack.setOutlineColor(sf::Color::Black);
-    w.draw(lvlBack);
-
-    int pseudoLevel = 1 + p.getMaterials() / 10;
-    float lvlPercent = std::min(1.f, (p.getMaterials() % 10) / 10.f);
-    sf::RectangleShape lvlBar(sf::Vector2f(186.f * lvlPercent, 18.f));
-    lvlBar.setPosition(72.f, 56.f);
-    lvlBar.setFillColor(sf::Color(70, 210, 80));
-    w.draw(lvlBar);
-
-    sf::Text lvlText = text(18, "LV." + std::to_string(pseudoLevel), 0.f, 0.f, sf::Color::White);
-    lvlText.setStyle(sf::Text::Bold);
-    centerText(lvlText, 235.f, 65.f);
-    w.draw(lvlText);
-
-    sf::CircleShape icon1(10.f);
-    icon1.setPosition(30.f, 98.f);
-    icon1.setFillColor(sf::Color(110, 255, 110));
-    icon1.setOutlineThickness(2.f);
-    icon1.setOutlineColor(sf::Color::Black);
-    w.draw(icon1);
-
-    sf::CircleShape icon2(10.f);
-    icon2.setPosition(30.f, 142.f);
-    icon2.setFillColor(sf::Color(255, 70, 70));
-    icon2.setOutlineThickness(2.f);
-    icon2.setOutlineColor(sf::Color::Black);
-    w.draw(icon2);
-
-    sf::RectangleShape icon3(sf::Vector2f(18.f, 6.f));
-    icon3.setPosition(30.f, 191.f);
-    icon3.setFillColor(sf::Color(220, 220, 220));
-    icon3.setOutlineThickness(2.f);
-    icon3.setOutlineColor(sf::Color::Black);
-    w.draw(icon3);
-
-    std::ostringstream dmg;
-    dmg << std::fixed << std::setprecision(1) << p.getDamage();
-
-    sf::Text matValue = text(27, std::to_string(p.getMaterials()), 58.f, 92.f, sf::Color::White);
-    matValue.setStyle(sf::Text::Bold);
-    w.draw(matValue);
-
-    sf::Text matLabel = text(16, "MATERIALS", 145.f, 102.f, sf::Color::White);
-    matLabel.setStyle(sf::Text::Bold);
-    centerText(matLabel, 190.f, 110.f);
-    w.draw(matLabel);
-
-    sf::Text hpSmallValue = text(27, std::to_string(p.getHp()), 58.f, 136.f, sf::Color::White);
-    hpSmallValue.setStyle(sf::Text::Bold);
-    w.draw(hpSmallValue);
-
-    sf::Text hpLabel = text(16, "HP", 145.f, 146.f, sf::Color::White);
-    hpLabel.setStyle(sf::Text::Bold);
-    centerText(hpLabel, 190.f, 154.f);
-    w.draw(hpLabel);
-
-    sf::Text dmgValue = text(27, dmg.str(), 58.f, 184.f, sf::Color::White);
-    dmgValue.setStyle(sf::Text::Bold);
-    w.draw(dmgValue);
-
-    sf::Text dmgLabel = text(16, "DAMAGE", 145.f, 194.f, sf::Color::White);
-    dmgLabel.setStyle(sf::Text::Bold);
-    centerText(dmgLabel, 190.f, 202.f);
-    w.draw(dmgLabel);
-
-    sf::Text waveTitle = text(28, "WAVE " + std::to_string(wave), 0.f, 0.f, sf::Color::White);
-    waveTitle.setStyle(sf::Text::Bold);
-    centerText(waveTitle, W / 2.f, 36.f);
-    w.draw(waveTitle);
-
-    int showSeconds = static_cast<int>(waveTimer + 0.999f);
-    if (showSeconds < 0)
-        showSeconds = 0;
-    sf::Text timerText = text(52, std::to_string(showSeconds), 0.f, 0.f, sf::Color::White);
-    timerText.setStyle(sf::Text::Bold);
-    timerText.setOutlineThickness(4.f);
-    centerText(timerText, W / 2.f, 82.f);
-    w.draw(timerText);
-
-    sf::Text gameTimeText = text(18, "Time " + std::to_string(static_cast<int>(gameTime)), 0.f, 0.f, sf::Color::White);
-    gameTimeText.setStyle(sf::Text::Bold);
-    centerText(gameTimeText, W / 2.f, 120.f);
-    w.draw(gameTimeText);
-
-    sf::RectangleShape bottomShadow(sf::Vector2f(W - 30.f, 48.f));
-    bottomShadow.setPosition(19.f, H - 52.f);
+    sf::RectangleShape bottomShadow(sf::Vector2f(W - 30, 48));
+    bottomShadow.setPosition(19, H - 52);
     bottomShadow.setFillColor(sf::Color(0, 0, 0, 80));
     w.draw(bottomShadow);
 
-    sf::RectangleShape bottom(sf::Vector2f(W - 30.f, 48.f));
-    bottom.setPosition(15.f, H - 56.f);
-    bottom.setFillColor(sf::Color(35, 35, 35, 165));
-    bottom.setOutlineThickness(3.f);
-    bottom.setOutlineColor(sf::Color(240, 240, 240));
+    sf::RectangleShape bottom(sf::Vector2f(W - 30, 48));
+    bottom.setPosition(15, H - 56);
+    bottom.setFillColor(sf::Color(248, 244, 232));
+    bottom.setOutlineThickness(3);
+    bottom.setOutlineColor(sf::Color(35, 35, 35));
     w.draw(bottom);
 
-    sf::Text controls = text(21, "WASD / Arrows - Move", 0.f, 0.f, sf::Color::White);
+    sf::Text controls = text(21, "WASD / Arrows - Move", 0, 0, sf::Color::White);
     controls.setStyle(sf::Text::Bold);
-    centerText(controls, 190.f, H - 32.f);
+    centerText(controls, 170, H - 32);
     w.draw(controls);
 
-    sf::Text upgrade = text(21, "Last upgrade: " + last, 0.f, 0.f, sf::Color(140, 210, 255));
+    sf::Text upgrade = text(21, "Last upgrade: " + last, 0, 0, sf::Color(120, 190, 255));
     upgrade.setStyle(sf::Text::Bold);
-    centerText(upgrade, W / 2.f, H - 32.f);
+    centerText(upgrade, W / 2.f, H - 32);
     w.draw(upgrade);
 
-    sf::Text pause = text(21, "ESC - Pause", 0.f, 0.f, sf::Color::White);
+    sf::Text pause = text(21, "ESC - Pause", 0, 0, sf::Color::White);
     pause.setStyle(sf::Text::Bold);
-    centerText(pause, W - 150.f, H - 32.f);
+    centerText(pause, W - 140, H - 32);
     w.draw(pause);
 }
 
 void UIManager::drawShop(sf::RenderWindow& w, const Player& p)
 {
-    float W = static_cast<float>(w.getSize().x);
-    float H = static_cast<float>(w.getSize().y);
+    float W = w.getSize().x;
+    float H = w.getSize().y;
     float cx = W / 2.f;
 
     sf::RectangleShape overlay(sf::Vector2f(W, H));
@@ -291,8 +216,8 @@ void UIManager::drawShop(sf::RenderWindow& w, const Player& p)
 
 void UIManager::drawPause(sf::RenderWindow& w)
 {
-    float W = static_cast<float>(w.getSize().x);
-    float H = static_cast<float>(w.getSize().y);
+    float W = w.getSize().x;
+    float H = w.getSize().y;
     float cx = W / 2.f;
     float cy = H / 2.f;
 
@@ -322,8 +247,8 @@ void UIManager::drawPause(sf::RenderWindow& w)
 
 void UIManager::drawGameOver(sf::RenderWindow& w, int wave, int mat)
 {
-    float W = static_cast<float>(w.getSize().x);
-    float H = static_cast<float>(w.getSize().y);
+    float W = w.getSize().x;
+    float H = w.getSize().y;
     float cx = W / 2.f;
     float cy = H / 2.f;
 

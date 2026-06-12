@@ -1,8 +1,8 @@
 #include "Game.h"
 #include "Enemy.h"
-#include "MathUtils.h"
-#include "Pickup.h"
 #include "Projectile.h"
+#include "Pickup.h"
+#include "MathUtils.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -19,7 +19,7 @@ Game::Game()
 
     window.create(
         mode,
-        "Brotato",
+        "Brotato OOP Implementation",
         sf::Style::Titlebar | sf::Style::Close
     );
 
@@ -27,9 +27,9 @@ Game::Game()
 
     arena = sf::FloatRect(
         10.f,
-        10.f,
-        static_cast<float>(mode.width) - 20.f,
-        static_cast<float>(mode.height) - 80.f
+        90.f,
+        (float)mode.width - 20.f,
+        (float)mode.height - 160.f
     );
 
     player = nullptr;
@@ -77,37 +77,32 @@ void Game::reset()
     player = p.get();
     objects.push_back(std::move(p));
 
-    for (int i = 0; i < 120; i++)
+    for (int i = 0; i < 45; i++)
     {
         sf::Sprite rock(resources.texture("rock"));
-        rock.setOrigin(24.f, 24.f);
+        rock.setOrigin(24, 24);
         rock.setPosition(
-            randomFloat(arena.left + 20.f, arena.left + arena.width - 20.f),
-            randomFloat(arena.top + 20.f, arena.top + arena.height - 20.f)
+            randomFloat(arena.left + 30, arena.left + arena.width - 30),
+            randomFloat(arena.top + 30, arena.top + arena.height - 30)
         );
-        rock.setScale(randomFloat(.20f, .45f), randomFloat(.20f, .45f));
-        rock.setColor(sf::Color(180, 180, 180, 160));
+        rock.setScale(randomFloat(.7f, 1.3f), randomFloat(.7f, 1.3f));
         decorations.push_back(rock);
-    }
 
-    for (int i = 0; i < 80; i++)
-    {
         sf::Sprite grass(resources.texture("grass"));
-        grass.setOrigin(24.f, 24.f);
+        grass.setOrigin(24, 24);
         grass.setPosition(
-            randomFloat(arena.left + 25.f, arena.left + arena.width - 25.f),
-            randomFloat(arena.top + 25.f, arena.top + arena.height - 25.f)
+            randomFloat(arena.left + 30, arena.left + arena.width - 30),
+            randomFloat(arena.top + 30, arena.top + arena.height - 30)
         );
-        grass.setScale(randomFloat(.55f, .95f), randomFloat(.55f, .95f));
-        grass.setColor(sf::Color(255, 255, 255, 220));
+        grass.setScale(randomFloat(.6f, 1.2f), randomFloat(.6f, 1.2f));
         decorations.push_back(grass);
     }
 
     state = Playing;
     wave = 1;
     waveTimer = config.waveDuration;
-    spawnTimer = 0.f;
-    gameTime = 0.f;
+    spawnTimer = 0;
+    gameTime = 0;
     lastUpgrade = "None";
 }
 
@@ -157,10 +152,13 @@ void Game::handleEvents()
             {
                 if (e.key.code == sf::Keyboard::Num1)
                     applyUpgrade(1);
+
                 if (e.key.code == sf::Keyboard::Num2)
                     applyUpgrade(2);
+
                 if (e.key.code == sf::Keyboard::Num3)
                     applyUpgrade(3);
+
                 if (e.key.code == sf::Keyboard::Num4)
                     applyUpgrade(4);
             }
@@ -210,28 +208,14 @@ void Game::update(float dt)
 
 void Game::render()
 {
-    window.clear(sf::Color(78, 61, 43));
+    window.clear(sf::Color(238, 233, 220));
 
     sf::RectangleShape bg(sf::Vector2f(arena.width, arena.height));
     bg.setPosition(arena.left, arena.top);
-    bg.setFillColor(sf::Color(102, 80, 56));
-    bg.setOutlineThickness(0.f);
+    bg.setFillColor(sf::Color(245, 240, 230));
+    bg.setOutlineThickness(2);
+    bg.setOutlineColor(sf::Color(40, 40, 40));
     window.draw(bg);
-
-    for (int y = static_cast<int>(arena.top) + 8; y < arena.top + arena.height; y += 24)
-    {
-        for (int x = static_cast<int>(arena.left) + 8; x < arena.left + arena.width; x += 24)
-        {
-            int seed = (x * 13 + y * 17) % 23;
-            sf::CircleShape dot(1.5f + (seed % 3));
-            dot.setPosition(static_cast<float>(x + seed % 7), static_cast<float>(y + seed % 5));
-            if (seed % 2 == 0)
-                dot.setFillColor(sf::Color(92, 72, 49, 110));
-            else
-                dot.setFillColor(sf::Color(126, 98, 70, 80));
-            window.draw(dot);
-        }
-    }
 
     drawDecorations();
 
@@ -341,6 +325,7 @@ void Game::handleCollisions()
 
                     std::ostringstream ss;
                     ss << "-" << std::fixed << std::setprecision(1) << pr->getDamage();
+
                     addFloatingText(ss.str(), en->getPosition(), sf::Color(255, 235, 100));
 
                     if (!en->isAlive())
@@ -354,7 +339,7 @@ void Game::handleCollisions()
         {
             if (distance(pr->getPosition(), player->getPosition()) < pr->getRadius() + player->getRadius())
             {
-                player->damagePlayer(static_cast<int>(pr->getDamage()));
+                player->damagePlayer((int)pr->getDamage());
                 pr->destroy();
                 addFloatingText("-1 HP", player->getPosition(), sf::Color(255, 80, 80));
             }
@@ -397,8 +382,10 @@ void Game::removeDeadObjects()
             [](const std::unique_ptr<GameObject>& o)
             {
                 Player* p = dynamic_cast<Player*>(o.get());
+
                 if (p)
                     return false;
+
                 return !o->isAlive();
             }
         ),
@@ -410,6 +397,7 @@ void Game::removeDeadObjects()
     for (auto& o : objects)
     {
         Player* p = dynamic_cast<Player*>(o.get());
+
         if (p)
         {
             player = p;
@@ -470,7 +458,7 @@ void Game::updateFloatingTexts(float dt)
         f.text.move(f.velocity * dt);
 
         sf::Color c = f.text.getFillColor();
-        c.a = static_cast<sf::Uint8>(std::max(0.f, f.lifeTime / 1.1f) * 255.f);
+        c.a = (sf::Uint8)(std::max(0.f, f.lifeTime / 1.1f) * 255.f);
         f.text.setFillColor(c);
     }
 
@@ -501,14 +489,17 @@ Player* Game::getPlayer()
 void Game::keepInsideArena(sf::Sprite& s)
 {
     sf::Vector2f p = s.getPosition();
-    float m = 30.f;
+    float m = 30;
 
     if (p.x < arena.left + m)
         p.x = arena.left + m;
+
     if (p.x > arena.left + arena.width - m)
         p.x = arena.left + arena.width - m;
+
     if (p.y < arena.top + m)
         p.y = arena.top + m;
+
     if (p.y > arena.top + arena.height - m)
         p.y = arena.top + arena.height - m;
 
@@ -529,7 +520,7 @@ void Game::playerShoot()
         return;
 
     Enemy* closest = nullptr;
-    float best = 9999999.f;
+    float best = 9999999;
 
     for (auto& o : objects)
     {
@@ -538,6 +529,7 @@ void Game::playerShoot()
         if (e && e->isAlive())
         {
             float d = distance(player->getPosition(), e->getPosition());
+
             if (d < best)
             {
                 best = d;
@@ -578,15 +570,16 @@ void Game::enemyShoot(const sf::Vector2f& pos, const sf::Vector2f& dir)
 void Game::addFloatingText(const std::string& msg, const sf::Vector2f& pos, sf::Color color)
 {
     FloatingText f;
+
     f.text.setFont(resources.font("main"));
     f.text.setCharacterSize(22);
     f.text.setStyle(sf::Text::Bold);
     f.text.setString(msg);
     f.text.setFillColor(color);
-    f.text.setOutlineColor(sf::Color::Black);
-    f.text.setOutlineThickness(2.f);
     f.text.setPosition(pos);
-    f.velocity = sf::Vector2f(0.f, -38.f);
+
+    f.velocity = sf::Vector2f(0, -38);
     f.lifeTime = 1.1f;
+
     floatingTexts.push_back(f);
 }

@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Brotato OOP",
+            "type": "shell",
+            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+            "args": [
+                "-std=c++17",
+                "-Iinclude",
+                "main.cpp",
+                "src/Game.cpp",
+                "src/GameObject.cpp",
+                "src/ResourceManager.cpp",
+                "src/MathUtils.cpp",
+                "src/Player.cpp",
+                "src/Enemy.cpp",
+                "src/Projectile.cpp",
+                "src/Pickup.cpp",
+                "src/UIManager.cpp",
+                "-o",
+                "main.exe",
+                "-lsfml-graphics",
+                "-lsfml-window",
+                "-lsfml-system"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "PATH": "C:\\msys64\\ucrt64\\bin;${env:PATH}"
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        }
+    ]
+}
