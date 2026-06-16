@@ -1,4 +1,4 @@
-# Brotato OOP Implementation
+# Brotato
 
 This is a Brotato-style arena shooter made in C++ using SFML.
 
